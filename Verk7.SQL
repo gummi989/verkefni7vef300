@@ -1,1 +1,1 @@
-create database 2507002960_Verk7;
+create database 2704982729_Verkefni7;
