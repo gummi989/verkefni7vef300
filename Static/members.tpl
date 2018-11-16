@@ -5,7 +5,7 @@
 	<title>Members</title>
 	<style type="text/css">
 		body{
-			background-color: lightblue;
+			background-color: red;
 			margin: 3em;
 		}
 
