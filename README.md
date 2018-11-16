@@ -1,1 +1,3 @@
-# verkefni7vef300
+# Skilaverkefni7
+
+https://verke2.herokuapp.com/
