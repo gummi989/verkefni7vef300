@@ -1,42 +1,60 @@
-from bottle import run, route, get, post, request, template, response, redirect
-import os
 
-@route('/')
-@get('/login') # or @route('/login')
-def login():
-    return '''
-        <form action="/login" method="post">
-            Username: <input name="username" type="text" />
-            Password: <input name="password" type="password" />
-            <input value="Login" type="submit" />
-        </form>
-    '''
+@get('/')
+def index():
+    return template('Static/index')
 
-@post('/login') # or @route('/login', method='POST')
-def do_login():
-    username = request.forms.get('username')
-    password = request.forms.get('password')
+@route('/donyskra', method='POST')
+def nyr():
+    u = request.forms.get('user')
+    p = request.forms.get('pass')
+    n = request.forms.get('nafn')
 
-    # hér væri hægt að nota csv skrá til að bera saman við notendur og lykilorð
-    # harðkóðuð lausn
-    if username == "admin" and password == "4321":
-        response.set_cookie("account", username, secret='some-secret-key')
-        return redirect("/restricted")
+    conn = pymysql.connect(host='tsuts.tskoli.is', port=3306, user='2507002960', passwd='mypassword',db='2704982729_Verkefni7')
+    cur = conn.cursor()
+
+    cur.execute("SELECT count(*) From 2704982729_Verkefni7.user where user=%s",(u))
+    result = cur.fetchone()
+
+    if result[0] == 0:
+        cur.execute("Insert into 2704982729_Verkefni7.user Values(%s,%s,%s)", (u,p,n))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return u, " hefur verið skráður <br><a href='/'>Heim</a>"
     else:
-        return "<p>Login failed.</p>"
+        return u, " frátekið notendanafn, reyndu aftur <br><a href='/#ny'>Nyskra</a>"
 
-@route('/restricted')
-def restricted_area():
-    username = request.get_cookie("account", secret='some-secret-key')
-    if username:
-        return template("<a href='/logout'>Logout</a><br><br>{{name}}. You are logged in! <br> Welcome to secret page.", name=username)
+@route('/doinnskra', method='POST')
+def doinn():
+    u = request.forms.get('user')
+    p = request.forms.get('pass')
+
+    conn = pymysql.connect(host='tsuts.tskoli.is', port=3306, user='2704982729', passwd='mypassword',db='2704982729_Verkefni7')
+    cur = conn.cursor()
+
+    cur.execute("SELECT count(*) From 2704982729_Verkefni7.user where user=%s and pass=%s",(u,p))
+    result = cur.fetchone()
+    print(result)
+
+    if result[0] == 1:
+        cur.close()
+        conn.close()
+        return template('Static/leyni',u=u)
     else:
-        return "You are not logged in. Access denied."
+        return template('Static/ekkileyni')
 
-@route('/logout')
-def logout():
-    response.set_cookie("account", "", secret='some-secret-key', expires=0)
-    return redirect('/login')
+@route('/members')
+def member():
+    conn = pymysql.connect(host='tsuts.tskoli.is', port=3306, user='2507002960', passwd='mypassword',db='2704982729_Verkefni7')
+    cur = conn.cursor()
+    cur.execute("SELECT nafn From 2704982729_Verkefni7.user")
+    result = cur.fetchall()
+    cur.close()
+    output = template('Static/members', rows=result)
+    return output
 
 
-run(host='0.0.0.0', port=os.environ.get('PORT'), debug=True)
+try:
+    run(host="0.0.0.0", port=os.environ.get('PORT'))
+except:
+run(debug=True)
