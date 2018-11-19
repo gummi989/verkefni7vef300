@@ -1,4 +1,6 @@
+import sys
 
+import bottle
 @get('/')
 def index():
     return template('Static/index')
