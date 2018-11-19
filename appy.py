@@ -1,6 +1,5 @@
-import sys
-
-import bottle
+import pymysql
+from bottle import *
 @get('/')
 def index():
     return template('Static/index')
